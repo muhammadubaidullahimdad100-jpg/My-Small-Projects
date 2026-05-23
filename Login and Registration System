@@ -1,0 +1,168 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+using namespace std;
+
+class Login_and_Registration_System
+{
+public:
+    string username;
+    string password;
+    Login_and_Registration_System()
+    {
+        username = "";
+        password = "";
+    }
+    string encryptPassword(string p)
+    {
+        for (int i = 0; i < p.length(); i++)
+        {
+            p[i] = p[i] + 3; 
+        }
+        return p;
+    }
+    bool isValidInput(string u, string p)
+    {
+        if (u.empty() || p.empty())
+        {
+            cout << "Username or Password cannot be empty!\n";
+            return false;
+        }
+        if (u.length() < 3)
+        {
+            cout << "Username must be at least 3 characters!\n";
+            return false;
+        }
+        if (p.length() < 4)
+        {
+            cout << "Password must be at least 4 characters!\n";
+            return false;
+        }
+        return true;
+    }
+
+    bool Search(string u)
+    {
+        ifstream file("Data.txt");
+        string tempUser, tempPass;
+
+        while (file >> tempUser >> tempPass)
+        {
+            if (u == tempUser)
+            {
+                file.close();
+                return true;
+            }
+        }
+        file.close();
+        return false;
+    }
+
+    void Registration(string u, string p)
+    {
+        username = u;
+        password = p;
+
+        
+        if (!isValidInput(u, p))
+        {
+            return;
+        }
+
+    
+        if (Search(u))
+        {
+            cout << "Username Already Exists! Try another.\n";
+            return;
+        }
+
+        ofstream file("Data.txt", ios::app);
+        if (file.is_open())
+        {
+            
+            file << username << " " << encryptPassword(password) << endl;
+            cout << "User Registered Successfully!\n";
+        }
+        else
+        {
+            cout << "File Not Open\n";
+        }
+        file.close();
+    }
+
+    void Login(string u, string p)
+    {
+        if (!isValidInput(u, p))
+        {
+            return;
+        }
+
+        ifstream file("Data.txt");
+        string us, pass;
+
+        if (!file.is_open())
+        {
+            cout << "File Not Open\n";
+            return;
+        }
+
+        string encryptedInput = encryptPassword(p); 
+
+        while (file >> us >> pass)
+        {
+            if (u == us && encryptedInput == pass)
+            {
+                cout << "Login Successful! Welcome, " << u << "!\n";
+                file.close();
+                return;
+            }
+        }
+        cout << "Invalid Username or Password!\n";
+        file.close();
+    }
+};
+
+int main()
+{
+    Login_and_Registration_System l;
+    string username, password;
+    int choice;
+
+    while (1)
+    {
+        cout << "\n===== Menu =====\n";
+        cout << "1) Registration\n";
+        cout << "2) Login\n";
+        cout << "3) Exit\n";
+        cout << "Enter Your Choice : ";
+        cin >> choice;
+
+        switch (choice)
+        {
+        case 1:
+            cout << "Enter Username : ";
+            cin >> username;
+            cout << "Enter Password : ";
+            cin >> password;
+            l.Registration(username, password);
+            break;
+
+        case 2:
+            cout << "Enter Username : ";
+            cin >> username;
+            cout << "Enter Password : ";
+            cin >> password;
+            l.Login(username, password);
+            break;
+
+        case 3:
+            cout << "Thank You For Visiting Us!\n";
+            return 0;
+
+        default:
+            cout << "Invalid Choice!\n";
+            break;
+        }
+    }
+    return 0;
+}
